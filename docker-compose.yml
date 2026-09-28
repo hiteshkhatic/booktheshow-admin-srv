@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: admin-pg-db
+    environment:
+      POSTGRES_USER: superadmin
+      POSTGRES_PASSWORD: boss123
+      POSTGRES_DB: booktheshow_admin_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - "postgres_data:/var/lib/postgresql/data"
+
+volumes:
+  postgres_data:
