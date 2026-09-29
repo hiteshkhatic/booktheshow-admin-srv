@@ -15,5 +15,8 @@ export const createMovieBody = z.object({
   poster_url: z.url(),
 });
 
-export type CreateMovieInput = z.infer<typeof createMovieBody>;
 export type RegisterInput = z.infer<typeof createUserBody>;
+export type CreateMovieInput = z.infer<typeof createMovieBody>;
+export type CreateMovieWithAdmin = CreateMovieInput & {
+  createdBy: string;
+}

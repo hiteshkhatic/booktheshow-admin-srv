@@ -18,13 +18,19 @@ export const loginController = asyncHandler(
 
 export const createMovieController = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+
+    console.log('movie-controller hiteed')
     
     const adminId = req.admin?.id;
+
+    console.log("2, admin ID:", adminId);
 
     const movie = await createMovieInCatalog({
         ...req.body,
         createdBy: adminId,
     });
+
+    console.log("3. catalog responded")
 
     res.status(201).json({
         movie,

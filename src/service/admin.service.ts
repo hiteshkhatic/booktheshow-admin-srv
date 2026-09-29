@@ -1,7 +1,7 @@
 import { createAdmin, findAdminByUsername, storeRefreshToken } from "../repository/admin.repository.js";
 import { AppError } from "../utils/AppError.js";
 import bcrypt from 'bcrypt';
-import type { CreateMovieInput, RegisterInput } from "../validation/admin.vaidation.js";
+import type { CreateMovieInput, CreateMovieWithAdmin, RegisterInput } from "../validation/admin.vaidation.js";
 import { toAdminResponseDTO } from "../dto/admin.dto.js";
 import jwt from 'jsonwebtoken';
 import { signRefreshToken } from "../utils/refreshToken.js";
@@ -37,8 +37,9 @@ export const login = async (input: RegisterInput) => {
     }
 
     const accessToken = jwt.sign(
-        { sub: admin.id,
-        role: "admin",
+        { 
+            sub: admin.id,
+            role: "admin",
         }, 
         secret,
         {expiresIn: "15m",})
@@ -50,17 +51,23 @@ export const login = async (input: RegisterInput) => {
     return { admin: toAdminResponseDTO(admin), accessToken, refreshToken}
 }
 
-export const createMovieInCatalog = async(data: CreateMovieInput) => {
+export const createMovieInCatalog = async(data: CreateMovieWithAdmin) => {
+    console.log('4 movie-service heated')
+    console.log("URL:", process.env.CATALOG_SERVICE_URL);
     const response = await fetch(
         `${process.env.CATALOG_SERVICE_URL}/internal/movies`,
         {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "x-internal-service-secret":
+                    process.env.INTERNAL_SERVICE_SECRET!,
             },
             body: JSON.stringify(data),
         }
     );
+
+    console.log("5. catalog response", response.status);
 
     if (!response.ok) {
         throw new AppError(

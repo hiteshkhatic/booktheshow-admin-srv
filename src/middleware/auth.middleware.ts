@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction} from 'express';
 import jwt from 'jsonwebtoken';
 import { AppError } from '../utils/AppError.js';
 
-const ACCESS_TOKEN = process.env.JWT_ACCESS_TOKEN!;
+const ACCESS_TOKEN = process.env.JWT_ACCESS_SECRET!;
 
 if (!ACCESS_TOKEN) {
     throw new Error('jwt access secret env variable is missing')
@@ -11,7 +11,10 @@ if (!ACCESS_TOKEN) {
 declare global {
     namespace Express {
         interface Request {
-            admin?: { id: string };
+            admin?: { 
+                id: string;
+                role: "admin";
+            };
         }
     }
 }
@@ -30,8 +33,21 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
     }
 
     try {
-        const payload = jwt.verify(token, ACCESS_TOKEN) as { sub: string};
-        req.admin = { id: payload.sub};
+        const payload = jwt.verify(token, ACCESS_TOKEN) as { 
+            sub: string;
+            role: "admin";
+        };
+
+        if (payload.role !== "admin") {
+            return res.status(403).json({
+                error: "Admin access required",
+            })
+        }
+
+        req.admin = {
+            id: payload.sub,
+            role: payload.role,
+        }
         next();
     } catch (err) {
         if (err instanceof jwt.TokenExpiredError) {
